@@ -1,8 +1,8 @@
 package user
 
 type User struct {
-	id   int
-	name string
-	age  int
-	city string
+	Id   int    `json:"id"`
+	Name string `name:"id"`
+	Age  int    `age:"id"`
+	City string `city:"id"`
 }

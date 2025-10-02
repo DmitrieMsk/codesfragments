@@ -1,60 +1,35 @@
 package main
 
 import (
-	"database/sql"
+	"codesfragments/internal/user"
+	"codesfragments/storage"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
-type user struct {
-	id   int
-	name string
-	age  int
-	city string
-}
-
 func main() {
+	//router
+	router := gin.Default()
+	//router
+
 	connStr := "user=dmitriemoskvin password=0000 dbname=codesfragments sslmode=disable"
-
-	db, err := sql.Open("postgres", connStr)
+	db, err := storage.NewDBConnect(connStr)
 	if err != nil {
-		fmt.Println("ошибка подключения: ", err)
+		panic("ошибка подключения к базе данных")
 	}
-	defer db.Close()
-	fmt.Println("check ping")
-	err = db.Ping()
-	if err != nil {
-		fmt.Println("ошибка ping: ", err)
-	}
+	userRepos := user.NewUserRepository(db)
+	user.NewUserHadnler(router, userRepos)
 
-	// sqlRes, err := db.Exec("insert into test_table2 (name, age, city) values ('DIMA', $1, $2)", "22", "moskow_city")
+	// sqlRes, err := db.Exec("insert into test_table2 (name, age, city) values ("DIMA", $1, $2)", "22", "moskow_city")
 	// if err != nil {
 	// 	fmt.Println("ошибка exec: ", err)
 	// }
 
-	rows, err := db.Query("select * from test_table2")
-	if err != nil {
-		fmt.Println("ошибка exec: ", err)
-	}
-	defer rows.Close()
-
-	users := []user{}
-
-	for rows.Next() {
-		u := user{}
-		err := rows.Scan(&u.id, &u.name, &u.age, &u.city)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		users = append(users, u)
-	}
-	for _, u := range users {
-		fmt.Println(u.id, u.name, u.age, u.city)
-	}
-
 	//id, _ := sqlRes.LastInsertId()
-	fmt.Println("end")
+	fmt.Println(db)
+
+	router.Run() // по умолчанию слушает 0.0.0.0:8080
 
 }
